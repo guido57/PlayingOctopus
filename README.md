@@ -23,13 +23,21 @@ The main distinctive capabilities of this building are:
 
 ESP32 is very powerful but its storage memory (flash) is very limited while we need to play mp3 (1 - 4 MBytes) along with midi files, therefore we need an external storage server.
 
-### Hardware
+### Hardware and libraries
 
 You can run this python app on a Raspberry PI 3B, 4 or 5 or on any Linux (Ubuntu 22.04 tested). 
 
 You need:
 * Python 3
-* fluidsynth               sudo apt install fluidsynth
-* flask                    pip install Flask
+* fluidsynth
+```
+sudo apt install fluidsynth
+```
+
+* flask
+```
+pip install Flask
+```
   
 ### Python code
+
