@@ -38,10 +38,24 @@ sudo apt install fluidsynth
 ```
 pip install Flask
 ```
+
+## Octopus web server
+
+It is based on the [Autoconnect library by Hieromon](https://github.com/Hieromon/AutoConnect)
+Here you are the most distinctive pages.
+
+### Browse
+
+![](https://github.com/guido57/PlayingOctopus/blob/main/docs/octopus-browse.png)
+
+
+
   
 ### Server code
 
-The pages served by the flask python server are:
+The pages served by the flask python server are directly called and managed by the client (ESP32). Anyway they can be called for testing purposes.
+
+They are:
 
 * /events?query=<word_to_search_separated_by_a_+>   e.g. /search?q=rolling+stones
   
