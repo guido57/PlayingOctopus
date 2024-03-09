@@ -39,5 +39,33 @@ sudo apt install fluidsynth
 pip install Flask
 ```
   
-### Python code
+### Server code
+
+The pages served by the flask python server are:
+
+* /events?query=<word_to_search_separated_by_a_+>   e.g. /search?q=rolling+stones
+  
+  return a list of songs accomplishing the query
+
+  
+* /tracks?index=<codefile>  e.g. /tracks?index=63118
+  
+  return the tracks for that filecode (song id)
+
+
+* /get_mp3?index=<codefile>  e.g. /get_mp3?index=63118
+  
+  convert the mid file (e.g. 63118.mid) to an mp3 file (e.g. 63118.mp3) and store it to the server folder "static"
+
+
+* /output.mp3?query=<codefile>  e.g. /output.mp3?query=63118
+  
+  stream that mp3 file (e.g. 63118.mp3) to the client 
+
+
+* /output.mid?query=<codefile>  e.g. /output.mid?query=63118
+
+  stream that mid file (e.g. 63118.mid) to the client 
+
+
 
