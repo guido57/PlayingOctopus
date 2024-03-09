@@ -216,8 +216,6 @@ def tracks():
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
 
-
-
 @app.route('/search')
 def index():
     return render_template('index.html')
