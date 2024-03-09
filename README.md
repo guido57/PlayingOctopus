@@ -21,6 +21,8 @@ The main distinctive capabilities of this building are:
 
 ## Octopus web server
 
+The only way to use the Playing Octopus is connecting to its web server.
+
 It is based on the [Autoconnect library by Hieromon](https://github.com/Hieromon/AutoConnect)
 Here you are the most distinctive pages.
 
@@ -57,10 +59,22 @@ The servo motors moving the mallets must be carefully tuned. For each of the six
 
 ![](https://github.com/guido57/PlayingOctopus/blob/main/docs/octopus-filesys.png)
 
+it can be used to set the Octopus Server URL. After running the python flask server on a shell, the program outputs its URL:
+```
+* Serving Flask app 'OctopusServer'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.232:5000
+Press CTRL+C to quit
+```
+You have to copy that URL (e.g. http://192.168.1.232:5000) to the FileSys page and save it.
+
  
 ## Python Flask Server
 
-ESP32 is very powerful but its storage memory (flash) is very limited while we need to play mp3 (1 - 4 MBytes) along with midi files, therefore we need an external storage server.
+ESP32 is very powerful but its storage memory (flash) is very limited while we need to play mp3 (1 - 4 MBytes) along with midi files, therefore we need an external storage server. See the folder /static where a few mp3 and mid file are already available.
 
 ### Hardware and libraries
 
