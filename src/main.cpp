@@ -9,7 +9,6 @@
 #include <SdFat.h>
 //#include <FileSPIFF.h>
 #include <MD_MIDIFile.h>
-#include "tb.h" // demo MIDI file
 #define USE_MIDI  0  // set to 1 for MIDI output, 0 for debug output
 
 #if USE_MIDI // set up for direct MIDI serial output
@@ -45,7 +44,6 @@ MD_MIDIFile * SMF = nullptr;
 // Declare the AudioFileSource objects
 
 #include "config.h"
-//bell_struct Bells[6];
 config_struct config;
 config_struct config_default;
 
@@ -59,10 +57,11 @@ void init_config_default(){
   config_default.Bells[5] = { 14, 86,110, 90,  80,200};
   config_default.mp3_to_smf_delay_ms = 200L;
   config_default.volume = 4;
+  strcpy(config_default.server_url,"http://192.168.1.232:5000");
 };
 
 // download setting 
-#define DWNL_BUFF_SIZE 300000
+#define DWNL_BUFF_SIZE 300000 // to be allocated in PSRAM
 //unsigned char dwnl_buffer[DWNL_BUFF_SIZE];
 unsigned char * dwnl_buffer;
 Downloader dwnl;
@@ -70,7 +69,7 @@ Downloader dwnl;
 unsigned long start_mp3_ms = 0L;
 unsigned long start_SMF_ms = 0L;
 
-TBServo * mytbservo7779;           // create servo object to control a servo
+TBServo * mytbservo7779;                               // create servo object to control a servo
 int servoPin7779 = config.Bells[0].pin;    //TMS       // the ESP32 pin where the servo is connected to              GPIO14/TMS
 TBServo * mytbservo8183;           // create servo object to control a servo
 int servoPin8183 = config.Bells[2].pin;    // GPIO33   // the ESP32 pin where the servo is connected to              GPIO33
@@ -78,9 +77,9 @@ TBServo * mytbservo8486;           // create servo object to control a servo
 int servoPin8486 = config.Bells[4].pin;    // TCK      // the ESP32 pin where the servo is connected to              GPIO13/TCK
 
 Audio audio;
-#define I2S_LRC     25   // 26
-#define I2S_DOUT    22   // 25
-#define I2S_BCLK    26  // 27
+#define I2S_LRC     25   
+#define I2S_DOUT    22   
+#define I2S_BCLK    26  
 #define I2S_MCLK     0
 
 void cb_play(int note){
@@ -88,15 +87,13 @@ void cb_play(int note){
   int audio_time = audio.getTotalPlayingTime();
   Serial.printf("\r\n%lu millis  callback with note=%d mp3_current=%d diff=%d\r\n", 
     milli, note, audio_time, milli - audio_time);
-  // All the notes are remapped between 77 and 87
   
-  switch(note%12){
-  //switch(note){
+  switch(note%12){ // note%12 means that all the notes are remapped between 77 and 87
     
-    case 4:  // 76
+    case 4:  // 76    76%12 = 4
     case 5:  // 77
     case 6:  // 78
-      mytbservo7779->targetTo(&config.Bells[0]);
+      mytbservo7779->targetTo(&config.Bells[0]); // mapped to Bell 0
       break;
     
     case 7:  // 79 
@@ -217,6 +214,7 @@ AutoConnectAux auxBrowse;
 AutoConnectAux auxFileSys;
 AutoConnectAux auxPlay;
 AutoConnectAux auxDelete;
+AutoConnectAux auxSaveServerUrl;
 //AutoConnectAux auxVolume;
 AutoConnectAux auxBells;
 AutoConnectAux auxSaveBell;
@@ -238,6 +236,7 @@ void writeConfigToFile(const char *filename) {
     //file.write( (const unsigned char *) config, sizeof(config));
     uint8_t * config_ptr = reinterpret_cast<uint8_t *>(&config);
     file.write(config_ptr , sizeof(config));
+    Serial.printf("writeConfigToFile: sizeof(config)=%d\r\n", sizeof(config));
 
     // Close the file
     file.close();
@@ -251,16 +250,16 @@ void readConfigFromFile(const char *filename) {
         Serial.printf("File doesn't exist yet. Initializing with default values.\n");
         // You can initialize the bellArray with default values or take appropriate action.
         init_config_default();
-        memcpy(&config,&config_default,sizeof(config_default));
-        Serial.printf("sizeof(config_default)=%d\r\n",sizeof(config_default));
+        memcpy(&config,&config_default,sizeof(config_struct));
+        Serial.printf("sizeof(config_default)=%d\r\n",sizeof(config_struct));
         writeConfigToFile(filename);
         return;
     }
 
     // Read the array of structs from the file
     file.readBytes((char *) &config, sizeof(config));
-    Serial.printf("From %s retrieved Bell[0].pin=%d Bell[0].note=%d\r\n", 
-        filename, config.Bells[0].pin,config.Bells[0].note );
+    Serial.printf("From %s retrieved server_url=%s\r\n", 
+        filename, config.server_url);
     // Close the file
     file.close();
 }
@@ -276,7 +275,8 @@ void play(String codefile, int track2play, uint8_t dac_gain){
   Serial.printf("play\r\n");
 
   // download mid file
-  String url_mid = "http://192.168.1.232:5000/static/" + codefile + ".mid";
+  //String url_mid = "http://192.168.1.232:5000/static/" + codefile + ".mid";
+  String url_mid = String(config.server_url) + "/static/" + codefile + ".mid";
   dwnl.Setup(url_mid,dwnl_buffer, DWNL_BUFF_SIZE);
   unsigned long timeout_ms = 5000 + millis(); // 5 seconds
   while(dwnl.Loop()){
@@ -322,7 +322,8 @@ void play(String codefile, int track2play, uint8_t dac_gain){
   Serial.printf("\r\nplay: set mp3 volume at gain=%d\r\n",dac_gain);
   audio.setVolume(dac_gain);
   audio.setTone(6,6,6);
-  String url = "http://192.168.1.232:5000/output.mp3?query="+codefile;
+  //String url = "http://192.168.1.232:5000/output.mp3?query="+codefile;
+  String url = String(config.server_url) + "/output.mp3?query="+codefile;
   Serial.printf("play: audio.connecttohost %s\r\n", url.c_str());
   audio.connecttohost(url.c_str());
   if(audio.isRunning()){
@@ -362,6 +363,9 @@ String postBrowse(AutoConnectAux& aux, PageArgument& args) {
   // this script allows the client browser pointing to /browse to check every second 
   // if playing has ended (status = Idle)
   // and update the page consequently  
+
+  Serial.printf("postBrowse ...\r\n");
+
   const char* scCopyText = R"(
     <script>
       function loadDoc() {
@@ -385,12 +389,10 @@ String postBrowse(AutoConnectAux& aux, PageArgument& args) {
   obj.value = String(scCopyText);
 
   const char* html_embed_list = R"(
-    <audio controls id="ss_static" src = "" type="audio/mp3"></audio>
-    <p id='results'></p>
     <script>
 
       function showTracks(filecode){
-             fetch('http://192.168.1.232:5000/tracks?index='+filecode)
+             fetch(server_url.innerText + '/tracks?index='+filecode)
             .then(response => response.json())
             .then(tracks_json => {
                 tracks_text = ""
@@ -418,7 +420,7 @@ String postBrowse(AutoConnectAux& aux, PageArgument& args) {
       function playAudio(filecode) { 
             // ask the server to get the mp3 file    
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'http://192.168.1.232:5000/get_mp3?index=' + filecode, true);
+            xhr.open('GET', server_url.innerText + '/get_mp3?index=' + filecode, true);
             xhr.responseType = 'blob';
 
             xhr.onload = function() {
@@ -427,16 +429,17 @@ String postBrowse(AutoConnectAux& aux, PageArgument& args) {
                     sel_codefile.value = filecode;    
 
                     var x = document.getElementById("ss_static"); 
-                    x.setAttribute("src", "http://192.168.1.232:5000/static/" + filecode + ".mp3");
+                    x.setAttribute("src", server_url.innerText + "/static/" + filecode + ".mp3");
                     x.play(); 
                 }
             };
             xhr.send();
       } 
-        search_query = document.getElementById("query");
-        const eventSource = new EventSource('http://192.168.1.232:5000/events?query='+search_query.value);
-        const resultsList = document.getElementById('results');
 
+      function mysearch(){
+        search_query = document.getElementById("search_query");
+        const eventSource = new EventSource(server_url.innerText + '/events?query='+search_query.value);
+        results.innerHTML = '';
         eventSource.onmessage = function(event) {
 
             if (event.data === 'END') {
@@ -450,30 +453,34 @@ String postBrowse(AutoConnectAux& aux, PageArgument& args) {
             inputItem.type = 'radio'
             inputItem.name ='songs'
             inputItem.setAttribute('onclick', 'playAudio(' + result.filecode + ')');
-            //const spanItem = document.createElement('span');
             const labelItem = document.createElement('label');
             inputText = result.ndx +' - ' + result.artist.replace(/_/g,' ') + ' - '+ result.song.replace(/_/g,' ') +' - filecode: ' + result.filecode;
-            resultsList.appendChild(inputItem);
-            //listItem.appendChild(spanItem);
+            results.appendChild(inputItem);
             labelItem.setAttribute("for","radio"+result.ndx);
             labelItem.innerHTML = inputText;
-            //inputItem.appendChild(spanItem);
-            resultsList.appendChild(labelItem);
-            //listItem.appendChild(button_play);
+            results.appendChild(labelItem);
             const button_tracks = document.createElement('button');
             button_tracks.id = 'bt' + result.filecode;
             button_tracks.setAttribute('onclick', 'showTracks(' + result.filecode + ')' );  
             button_tracks.textContent = 'show tracks'; // Set button text
-            //listItem.appendChild(button_tracks);
-            resultsList.appendChild(button_tracks);
-            //resultsList.appendChild(listItem);
-            resultsList.appendChild(document.createElement('br'));
-            
-        };
+            results.appendChild(button_tracks);
+            results.appendChild(document.createElement('br'));
+        };      
+      }
     </script>
-
+    
+    <audio controls id="ss_static" src = "" type="audio/mp3"></audio>
+    <br/>
+    <input type='button' id='btn_search' value='SEARCH' onclick='mysearch()'>
+    <input type='text' id='search_query' value=''>
+    <br/>
+    <p id='results'></p>
+    
   )";
   
+  AutoConnectText& server_url = aux["server_url"].as<AutoConnectText>();
+  server_url.value = String(config.server_url);
+
   AutoConnectSelect& volume = aux["select_volume"].as<AutoConnectSelect>();
   volume.selected = config.volume +1;
   
@@ -482,7 +489,7 @@ String postBrowse(AutoConnectAux& aux, PageArgument& args) {
   
   AutoConnectElement& embed_list = aux["embed_list"];
   embed_list.value = String(html_embed_list);
-  
+    
   return String();
 }
 
@@ -600,6 +607,7 @@ String postAuxPlay(AutoConnectAux& aux, PageArgument& args) {
     SMF_is_running = false; // SMF will be stopped on loop()
     btn_play.value = "PLAY";
   }
+  Serial.printf("postAuxPlay: redirect to /browse\r\n");
   aux.redirect("/browse");
   return String();
 }
@@ -794,6 +802,22 @@ String postAuxDelete(AutoConnectAux& aux, PageArgument& args) {
 }
 
 /*
+    handler to save the server_url
+*/
+String postAuxSaveServerUrl(AutoConnectAux& aux, PageArgument& args) {
+  Serial.printf("postAuxSaveServerUrl: ...\r\n");
+  
+  
+  AutoConnectInput&  server_url = auxFileSys["server_url"].as<AutoConnectInput>();
+  strcpy(config.server_url, server_url.value.c_str());
+  Serial.printf("Saving server_url=%s\r\n",config.server_url);
+  writeConfigToFile("/config.json");
+
+  aux.redirect("/spiffs");
+  return String();
+}
+
+/*
     handler to set the audio volume
 */
 String postAuxVolume(AutoConnectAux& aux, PageArgument& args) {
@@ -878,6 +902,8 @@ void setup()
   auxPlay.on(postAuxPlay);    
   auxDelete.load(PAGE_DELETE);
   auxDelete.on(postAuxDelete);      
+  auxSaveServerUrl.load(PAGE_SAVE_SERVER_URL);
+  auxSaveServerUrl.on(postAuxSaveServerUrl);      
   auxBells.load(PAGE_BELLS);
   auxBells.on(postAuxBells);
   auxSaveBell.load(SAVE_BELL);
@@ -891,7 +917,7 @@ void setup()
   auxDownloadBell.load(PAGE_DOWNLOAD);
   auxDownloadBell.on(postAuxDownloadBell);
 
-  portal.join({ auxBrowse, auxPlay, auxDelete,auxFileSys, 
+  portal.join({auxBrowse, auxPlay, auxDelete, auxSaveServerUrl,auxFileSys, 
                 auxBells,auxSaveBell,
                 auxTestBellTarget, auxTestBellRest, auxTestBell, auxDownloadBell});
   // serve the page /status directly from WebServer (wtihout using AutoConnect)
@@ -901,7 +927,7 @@ void setup()
     Serial.printf("Started IP: %s\r\n", WiFi.localIP().toString().c_str());
   }
 
-st = "Free RAM after AutoConnect: " + String(esp_get_free_heap_size()) + " bytes"  
+  st = "Free RAM after AutoConnect: " + String(esp_get_free_heap_size()) + " bytes"  
        + " ---- Used SPIFFS: " + String(LittleFS.usedBytes()) + " / " + String(LittleFS.totalBytes()) + " bytes.";
   Serial.printf("%s\r\n",st.c_str());
 

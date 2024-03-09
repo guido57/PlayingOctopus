@@ -16,6 +16,7 @@ struct config_struct {
   bell_struct Bells[6];
   long mp3_to_smf_delay_ms;
   int volume;
+  char server_url[40];
 };
 
 #endif

@@ -23,6 +23,12 @@ static const char PAGE_BROWSE[] PROGMEM = R"(
   "menu": true,
   "element": [
     {
+      "name": "server_url",
+      "type": "ACText",
+      "value": "server_url",
+      "posterior": "br"
+    },
+    {
       "name": "object",
       "type": "ACElement"
     },
@@ -63,24 +69,6 @@ static const char PAGE_BROWSE[] PROGMEM = R"(
       "value": "0",
       "label" : "mp3 to mid delay ms"
     },
-    
-    {
-      "name": "search",
-      "type": "ACSubmit",
-      "value": "SEARCH",
-      "uri": "/browse"
-    },
-    {
-      "name": "query",
-      "type": "ACInput",
-      "value": ""
-    },
-    {
-      "name": "status",
-      "type": "ACText",
-      "value": "status",
-      "posterior": "br"
-   },
    {
       "name": "embed_list",
       "type": "ACElement"
@@ -100,6 +88,20 @@ static const char PAGE_SPIFFS[] PROGMEM = R"(
       "name": "object",
       "type": "ACElement"
     }, 
+    {
+      "name": "server_url",
+      "label": "Server URL", 
+      "type": "ACInput",
+      "value": "http://192.168.1.232:5000",
+      "posterior": "none"
+    },
+    {
+      "name": "save",
+      "type": "ACSubmit",
+      "value": "SAVE",
+      "uri": "/save_server_url",
+      "posterior": "br"
+    },
     {
       "name": "delete",
       "type": "ACSubmit",
@@ -132,6 +134,23 @@ static const char PAGE_SPIFFS[] PROGMEM = R"(
       "name": "status",
       "type": "ACText",
       "value": "status"
+    }
+  ]
+}
+)";
+
+// HTML Page to delete a file
+static const char PAGE_SAVE_SERVER_URL[] PROGMEM = R"(
+{
+  "uri": "/save_server_url",
+  "title": "save_server_url",
+  "menu": false,
+  "response": false,
+  "element": [
+    {
+      "name": "caption",
+      "type": "ACText",
+      "value": "<h2>save server_url</h2>"
     }
   ]
 }
