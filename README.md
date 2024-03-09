@@ -42,6 +42,21 @@ Here you are the most distinctive pages.
 
 ![](https://github.com/guido57/PlayingOctopus/blob/main/docs/octopus-bells.png)
 
+The servo motors moving the mallets must be carefully tuned. For each of the six bells the following parameters must be tuned.
+
+* ESP32 GPIO pin: the hardware pin where the servo is connected to
+* Note: the note played by that bell (optional)
+* Servo Target Position: the position (in degrees) that the mallet must reach to hit the bell
+* target time in msecs: the time to stay on the target position
+* rest (idle): the position (in degrees) that the mallet must reach after hitting ther bell 
+* rest time in msecs: the time to stay on the rest position
+* BELL_TEST: to test the parameters set
+* SAVE_TEST: to save the parameters
+
+### FileSys
+
+![](https://github.com/guido57/PlayingOctopus/blob/main/docs/octopus-filesys.png)
+
  
 ## Python Flask Server
 
