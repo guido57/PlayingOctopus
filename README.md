@@ -18,10 +18,63 @@ The main distinctive capabilities of this building are:
 ## Software Architecture
 
 ![](https://github.com/guido57/PlayingOctopus/blob/main/docs/BlockDiagram.png)
+
+## Octopus web server
+
+The only way to use the Playing Octopus is connecting to its web server.
+
+It is based on the [Autoconnect library by Hieromon](https://github.com/Hieromon/AutoConnect)
+Here you are the most distinctive pages.
+
+### Browse
+
+![](https://github.com/guido57/PlayingOctopus/blob/main/docs/octopus-browse.png)
+
+* SEARCH the Internet for all the mid files accomplishing the query. The words must be separated by a +   e.g. parker+charlie
+
+  The search can be slow!
+
+* Select a song. Then the song can be listened (on the client browser) by the embedded audio player
+
+* PLAY run the Octopus to play the song (mp3) on its loudspeaker and the selected track bye the tubular bells
+
+* mp3 to mid delay ms is for synchronizing the mp3 to the tubular bells
+
+### Bells
+
+![](https://github.com/guido57/PlayingOctopus/blob/main/docs/octopus-bells.png)
+
+The servo motors moving the mallets must be carefully tuned. For each of the six bells the following parameters must be tuned.
+
+* ESP32 GPIO pin: the hardware pin where the servo is connected to
+* Note: the note played by that bell (optional)
+* Servo Target Position: the position (in degrees) that the mallet must reach to hit the bell
+* target time in msecs: the time to stay on the target position
+* rest (idle): the position (in degrees) that the mallet must reach after hitting ther bell 
+* rest time in msecs: the time to stay on the rest position
+* BELL_TEST: to test the parameters set
+* SAVE_TEST: to save the parameters
+
+### FileSys
+
+![](https://github.com/guido57/PlayingOctopus/blob/main/docs/octopus-filesys.png)
+
+it can be used to set the Octopus Server URL. After running the python flask server on a shell, the program outputs its URL:
+```
+* Serving Flask app 'OctopusServer'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.232:5000
+Press CTRL+C to quit
+```
+You have to copy that URL (e.g. http://192.168.1.232:5000) to the FileSys page and save it.
+
  
 ## Python Flask Server
 
-ESP32 is very powerful but its storage memory (flash) is very limited while we need to play mp3 (1 - 4 MBytes) along with midi files, therefore we need an external storage server.
+ESP32 is very powerful but its storage memory (flash) is very limited while we need to play mp3 (1 - 4 MBytes) along with midi files, therefore we need an external storage server. See the folder /static where a few mp3 and mid file are already available.
 
 ### Hardware and libraries
 
@@ -41,7 +94,9 @@ pip install Flask
   
 ### Server code
 
-The pages served by the flask python server are:
+The pages served by the flask python server are directly called and managed by the client (ESP32). Anyway they can be called for testing purposes.
+
+They are:
 
 * /events?query=<word_to_search_separated_by_a_+>   e.g. /search?q=rolling+stones
   
