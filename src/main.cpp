@@ -49,14 +49,14 @@ config_struct config_default;
 
 void init_config_default(){
 
-  config_default.Bells[0] = { 13, 77, 52, 63, 100,200};
-  config_default.Bells[1] = { 13, 79, 73, 63, 100,200};
-  config_default.Bells[2] = { 33, 81, 62, 72,  70,200};
-  config_default.Bells[3] = { 33, 83, 83, 72, 100,200};
-  config_default.Bells[4] = { 14, 84, 75, 90,  70,200};
-  config_default.Bells[5] = { 14, 86,110, 90,  80,200};
+  config_default.Bells[0] = { 14, 77, 112, 120, 100,200};
+  config_default.Bells[1] = { 14, 79, 130, 120, 100,200};
+  config_default.Bells[2] = { 33, 81,  94, 105,  20, 50};
+  config_default.Bells[3] = { 33, 83, 115, 105,  30, 30};
+  config_default.Bells[4] = { 13, 84,  70,  80,  70,200};
+  config_default.Bells[5] = { 13, 86,  90,  80,  80,200};
   config_default.mp3_to_smf_delay_ms = 200L;
-  config_default.volume = 4;
+  config_default.volume = 10;
   strcpy(config_default.server_url,"http://192.168.1.232:5000");
 };
 
