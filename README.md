@@ -123,4 +123,9 @@ They are:
   stream that mid file (e.g. 63118.mid) to the client 
 
 
+## New Version without a Server
+
+The development of a new version - not needing an external server - is in progress.  
+it consists in putting 10000 MIDI files and their coresponding 10000 MP3 into a 32 GB SD card, read by the ESP32.
+
 
