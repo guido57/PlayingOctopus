@@ -127,7 +127,7 @@ They are:
 
 The development of a new version - not needing an external server - is in progress.  
 it consists in putting 163000 MIDI files and their coresponding 63000 MP3 into a 32 GB SD card, read by the ESP32.
-* The 63000 MP3 occupy 24 GB (6MBytes each - sampled at 8KHz anche their bitrate is 16 kbit/sec)
+* The 63000 MP3 occupy 24 GB (0.375 MBytes each - sampled at 8KHz anche their bitrate is 16 kbit/sec)
 * The 63000 MIDI occupy 1,5GB (24 KBytes each)
 
 
