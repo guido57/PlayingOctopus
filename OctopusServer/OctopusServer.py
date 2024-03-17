@@ -79,9 +79,24 @@ def getFilenameUrlFromSong(songname):
     else:
         return None
 
-
 # return an array of urls where the words_to_search appear
 def search(words_to_search):
+
+    keywords = words_to_search.split(" ")
+    # Convert JSON string to Python list of dictionaries
+    with open("az.json", 'r') as file:
+        data = json.load(file)
+
+    for record in data:
+        if all(keyword in record["artist"] or keyword in record["song"] for keyword in keywords):
+            yield f"data: {json.dumps(record)}\n\n"
+
+    # Send termination message
+    yield "data: END\n\n"    
+
+
+# return an array of urls where the words_to_search appear
+def search_old(words_to_search):
     ndx = 0
     urls = []
     words_to_search = str(words_to_search).replace(" ", "+")
@@ -238,9 +253,9 @@ def get_mp3():
     # Get the midi file correponding to the codefile index
     if os.path.exists(fn) == False:
         download( codefile)
-    # Convert MIDI to MP3 using a command-line tool like FluidSynth
-    command = "fluidsynth -l -T raw -F - 1mgm.sf2 static/" + codefile + ".mid | lame -b 256 -r - " + fn
-    subprocess.run(command,shell=True, check=True)
+        # Convert MIDI to MP3 using a command-line tool like FluidSynth
+        command = "fluidsynth -l -T raw -F - 1mgm.sf2 static/" + codefile + ".mid | lame -b 256 -r - " + fn
+        subprocess.run(command,shell=True, check=True)
 
     # Send the MP3 file as a response
     #return send_file("output.mp3", as_attachment=True)
